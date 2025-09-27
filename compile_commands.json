@@ -1,0 +1,178 @@
+[
+  {
+    "arguments": [
+      "/nix/store/95k9rsn1zsw1yvir8mj824ldhf90i4qw-gcc-wrapper-14.3.0/bin/g++",
+      "-std=c++23",
+      "-g",
+      "-O1",
+      "-DWLR_USE_UNSTABLE",
+      "-c",
+      "-Iinclude",
+      "-Iinclude/inputs",
+      "-I/nix/store/4qskv3m83g94f38ll68ghhyxjhsyb7px-wlroots-0.19.0/include/wlroots-0.19",
+      "-I/nix/store/799yc9m4iflqpnaw831zc586zwc5k36a-wayland-1.24.0-dev/include",
+      "-I/nix/store/sjrgmkq1ad15z3w6g0am0avk3mwhwb2j-libinput-1.29.0-dev/include",
+      "-I/nix/store/y300dk1dnb8rkl9vnm4zv0ih6jffidyb-libxkbcommon-1.11.0-dev/include",
+      "-o",
+      "build/interrim/lib/server.o",
+      "lib/server.cpp"
+    ],
+    "directory": "/home/aids/git/beebot/programcontroller",
+    "file": "/home/aids/git/beebot/programcontroller/lib/server.cpp",
+    "output": "/home/aids/git/beebot/programcontroller/build/interrim/lib/server.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/95k9rsn1zsw1yvir8mj824ldhf90i4qw-gcc-wrapper-14.3.0/bin/g++",
+      "-std=c++23",
+      "-g",
+      "-O1",
+      "-DWLR_USE_UNSTABLE",
+      "-c",
+      "-Iinclude",
+      "-Iinclude/inputs",
+      "-I/nix/store/4qskv3m83g94f38ll68ghhyxjhsyb7px-wlroots-0.19.0/include/wlroots-0.19",
+      "-I/nix/store/799yc9m4iflqpnaw831zc586zwc5k36a-wayland-1.24.0-dev/include",
+      "-I/nix/store/sjrgmkq1ad15z3w6g0am0avk3mwhwb2j-libinput-1.29.0-dev/include",
+      "-I/nix/store/y300dk1dnb8rkl9vnm4zv0ih6jffidyb-libxkbcommon-1.11.0-dev/include",
+      "-o",
+      "build/interrim/nmain.o",
+      "src/nmain.cpp"
+    ],
+    "directory": "/home/aids/git/beebot/programcontroller",
+    "file": "/home/aids/git/beebot/programcontroller/src/nmain.cpp",
+    "output": "/home/aids/git/beebot/programcontroller/build/interrim/nmain.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/95k9rsn1zsw1yvir8mj824ldhf90i4qw-gcc-wrapper-14.3.0/bin/g++",
+      "-std=c++23",
+      "-g",
+      "-O1",
+      "-DWLR_USE_UNSTABLE",
+      "-c",
+      "-Iinclude",
+      "-Iinclude/inputs",
+      "-I/nix/store/4qskv3m83g94f38ll68ghhyxjhsyb7px-wlroots-0.19.0/include/wlroots-0.19",
+      "-I/nix/store/799yc9m4iflqpnaw831zc586zwc5k36a-wayland-1.24.0-dev/include",
+      "-I/nix/store/sjrgmkq1ad15z3w6g0am0avk3mwhwb2j-libinput-1.29.0-dev/include",
+      "-I/nix/store/y300dk1dnb8rkl9vnm4zv0ih6jffidyb-libxkbcommon-1.11.0-dev/include",
+      "-o",
+      "build/interrim/lib/scenes.o",
+      "lib/scenes.cpp"
+    ],
+    "directory": "/home/aids/git/beebot/programcontroller",
+    "file": "/home/aids/git/beebot/programcontroller/lib/scenes.cpp",
+    "output": "/home/aids/git/beebot/programcontroller/build/interrim/lib/scenes.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/95k9rsn1zsw1yvir8mj824ldhf90i4qw-gcc-wrapper-14.3.0/bin/g++",
+      "-std=c++23",
+      "-g",
+      "-O1",
+      "-DWLR_USE_UNSTABLE",
+      "-c",
+      "-Iinclude",
+      "-Iinclude/inputs",
+      "-I/nix/store/4qskv3m83g94f38ll68ghhyxjhsyb7px-wlroots-0.19.0/include/wlroots-0.19",
+      "-I/nix/store/799yc9m4iflqpnaw831zc586zwc5k36a-wayland-1.24.0-dev/include",
+      "-I/nix/store/sjrgmkq1ad15z3w6g0am0avk3mwhwb2j-libinput-1.29.0-dev/include",
+      "-I/nix/store/y300dk1dnb8rkl9vnm4zv0ih6jffidyb-libxkbcommon-1.11.0-dev/include",
+      "-o",
+      "build/interrim/lib/inputs/cursors.o",
+      "lib/inputs/cursors.cpp"
+    ],
+    "directory": "/home/aids/git/beebot/programcontroller",
+    "file": "/home/aids/git/beebot/programcontroller/lib/inputs/cursors.cpp",
+    "output": "/home/aids/git/beebot/programcontroller/build/interrim/lib/inputs/cursors.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/95k9rsn1zsw1yvir8mj824ldhf90i4qw-gcc-wrapper-14.3.0/bin/g++",
+      "-std=c++23",
+      "-g",
+      "-O1",
+      "-DWLR_USE_UNSTABLE",
+      "-c",
+      "-Iinclude",
+      "-Iinclude/inputs",
+      "-I/nix/store/4qskv3m83g94f38ll68ghhyxjhsyb7px-wlroots-0.19.0/include/wlroots-0.19",
+      "-I/nix/store/799yc9m4iflqpnaw831zc586zwc5k36a-wayland-1.24.0-dev/include",
+      "-I/nix/store/sjrgmkq1ad15z3w6g0am0avk3mwhwb2j-libinput-1.29.0-dev/include",
+      "-I/nix/store/y300dk1dnb8rkl9vnm4zv0ih6jffidyb-libxkbcommon-1.11.0-dev/include",
+      "-o",
+      "build/interrim/lib/inputs/keyboards.o",
+      "lib/inputs/keyboards.cpp"
+    ],
+    "directory": "/home/aids/git/beebot/programcontroller",
+    "file": "/home/aids/git/beebot/programcontroller/lib/inputs/keyboards.cpp",
+    "output": "/home/aids/git/beebot/programcontroller/build/interrim/lib/inputs/keyboards.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/95k9rsn1zsw1yvir8mj824ldhf90i4qw-gcc-wrapper-14.3.0/bin/g++",
+      "-std=c++23",
+      "-g",
+      "-O1",
+      "-DWLR_USE_UNSTABLE",
+      "-c",
+      "-Iinclude",
+      "-Iinclude/inputs",
+      "-I/nix/store/4qskv3m83g94f38ll68ghhyxjhsyb7px-wlroots-0.19.0/include/wlroots-0.19",
+      "-I/nix/store/799yc9m4iflqpnaw831zc586zwc5k36a-wayland-1.24.0-dev/include",
+      "-I/nix/store/sjrgmkq1ad15z3w6g0am0avk3mwhwb2j-libinput-1.29.0-dev/include",
+      "-I/nix/store/y300dk1dnb8rkl9vnm4zv0ih6jffidyb-libxkbcommon-1.11.0-dev/include",
+      "-o",
+      "build/interrim/lib/output.o",
+      "lib/output.cpp"
+    ],
+    "directory": "/home/aids/git/beebot/programcontroller",
+    "file": "/home/aids/git/beebot/programcontroller/lib/output.cpp",
+    "output": "/home/aids/git/beebot/programcontroller/build/interrim/lib/output.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/95k9rsn1zsw1yvir8mj824ldhf90i4qw-gcc-wrapper-14.3.0/bin/g++",
+      "-std=c++23",
+      "-g",
+      "-O1",
+      "-DWLR_USE_UNSTABLE",
+      "-c",
+      "-Iinclude",
+      "-Iinclude/inputs",
+      "-I/nix/store/4qskv3m83g94f38ll68ghhyxjhsyb7px-wlroots-0.19.0/include/wlroots-0.19",
+      "-I/nix/store/799yc9m4iflqpnaw831zc586zwc5k36a-wayland-1.24.0-dev/include",
+      "-I/nix/store/sjrgmkq1ad15z3w6g0am0avk3mwhwb2j-libinput-1.29.0-dev/include",
+      "-I/nix/store/y300dk1dnb8rkl9vnm4zv0ih6jffidyb-libxkbcommon-1.11.0-dev/include",
+      "-o",
+      "build/interrim/lib/toplevel.o",
+      "lib/toplevel.cpp"
+    ],
+    "directory": "/home/aids/git/beebot/programcontroller",
+    "file": "/home/aids/git/beebot/programcontroller/lib/toplevel.cpp",
+    "output": "/home/aids/git/beebot/programcontroller/build/interrim/lib/toplevel.o"
+  },
+  {
+    "arguments": [
+      "/nix/store/95k9rsn1zsw1yvir8mj824ldhf90i4qw-gcc-wrapper-14.3.0/bin/g++",
+      "-std=c++23",
+      "-g",
+      "-O1",
+      "-DWLR_USE_UNSTABLE",
+      "-c",
+      "-Iinclude",
+      "-Iinclude/inputs",
+      "-I/nix/store/4qskv3m83g94f38ll68ghhyxjhsyb7px-wlroots-0.19.0/include/wlroots-0.19",
+      "-I/nix/store/799yc9m4iflqpnaw831zc586zwc5k36a-wayland-1.24.0-dev/include",
+      "-I/nix/store/sjrgmkq1ad15z3w6g0am0avk3mwhwb2j-libinput-1.29.0-dev/include",
+      "-I/nix/store/y300dk1dnb8rkl9vnm4zv0ih6jffidyb-libxkbcommon-1.11.0-dev/include",
+      "-o",
+      "build/interrim/lib/input.o",
+      "lib/input.cpp"
+    ],
+    "directory": "/home/aids/git/beebot/programcontroller",
+    "file": "/home/aids/git/beebot/programcontroller/lib/input.cpp",
+    "output": "/home/aids/git/beebot/programcontroller/build/interrim/lib/input.o"
+  }
+]
