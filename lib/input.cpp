@@ -20,6 +20,7 @@ void InputManager::newInputDeviceResponder(wl_listener *listener, void *data) {
   case WLR_INPUT_DEVICE_POINTER:
     std::cout << "New pointer detected" << std::endl;
     wlr_cursor_attach_input_device(self->m_cursorManager.m_cursor, device);
+    self->m_cursorManager.m_device = device;
     break;
   default:
     break;

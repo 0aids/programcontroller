@@ -1,9 +1,9 @@
 CXX=g++
-DEV_FLAGS = -std=c++23 -g -O1 -MD -MP  -DWLR_USE_UNSTABLE #-fsanitize=address,undefined
+DEV_FLAGS = -std=c++23 -g -O1 -MD -MP  -DWLR_USE_UNSTABLE -fsanitize=address,undefined
 
 PKGS =   wayland-server libinput xkbcommon wlroots-0.19
 
-INCLUDES =  -Iinclude -Iinclude/inputs `pkg-config --cflags $(PKGS)`
+INCLUDES =  -Iinclude -Iinclude/inputs -Iinclude/wayland-protocols `pkg-config --cflags $(PKGS)`
 LINCLUDES = `pkg-config --libs $(PKGS)`
 
 CPPFILES = $(wildcard src/*.cpp)
