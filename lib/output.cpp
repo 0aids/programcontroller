@@ -1,4 +1,5 @@
 #include "output.hpp"
+#include "log.hpp"
 #include "server.hpp"
 #include <iostream>
 extern "C" {
@@ -7,7 +8,7 @@ extern "C" {
 #include <wlr/backend.h>
 }
 void WaylandOutput::newFrameResponder(wl_listener *listener, void *data) {
-  // std::cout << "Frame request received!\n";
+  // Log(Debug, "Frame request received!");
   WaylandOutput *self = wl_container_of(listener, self, m_newFrameListener);
   // This is the rendering loop.
   struct wlr_scene_output *scene_output = wlr_scene_get_scene_output(
@@ -28,7 +29,7 @@ void WaylandOutput::newStateResponder(wl_listener *listener, void *data) {
   WaylandOutput *self = wl_container_of(listener, self, m_newStateListener);
   // Used for changing the state of an ouput, depending on the output's
   // request.
-  std::cout << "Received a State Request!" << std::endl;
+  Log(Debug, "Received a State Request!");
   //
   auto *event =
       static_cast<const struct wlr_output_event_request_state *>(data);
@@ -69,7 +70,7 @@ WaylandOutput::WaylandOutput(OutputManager *outputManager, wlr_output *output) {
 
 // static
 void OutputManager::newOutputHandler(wl_listener *listener, void *data) {
-  std::cout << "New output detected!\n";
+  Log(Debug, "New output detected!");
   OutputManager *self = wl_container_of(listener, self, m_newOutputListener);
   auto *newOutput = static_cast<wlr_output *>(data);
 

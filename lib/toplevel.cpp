@@ -1,4 +1,5 @@
 #include "toplevel.hpp"
+#include "log.hpp"
 #include "server.hpp"
 #include <iostream>
 
@@ -13,7 +14,7 @@ void TopLevelView::commitResponder(wl_listener *listener, void *data) {
       (self->fullscreenAttempts++ > self->maximumFullscreenAttemptAmount)) {
     return;
   }
-  std::cout << "Received commit request" << std::endl;
+  Log(Debug, "Received commit request");
   // 1. Reliably get the primary (and only) output from the layout.
   // We don't ask the client where it is; we find the display ourselves.
   struct wlr_output *output = wlr_output_layout_get_center_output(
@@ -77,7 +78,7 @@ TopLevelView::TopLevelView(WaylandServer *parentServer,
 }
 
 void TopLevelsManager::newTopLevelResponder(wl_listener *listener, void *data) {
-  std::cout << "New toplevel detected" << std::endl;
+  Log(Debug, "New toplevel detected");
   TopLevelsManager *self = wl_container_of(listener, self, m_topLevelListener);
   auto *topLevel = static_cast<struct wlr_xdg_toplevel *>(data);
   auto *newView = new TopLevelView(self->m_parentServer, topLevel);

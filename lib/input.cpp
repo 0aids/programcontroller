@@ -1,4 +1,5 @@
 #include "input.hpp"
+#include "log.hpp"
 #include "server.hpp"
 #include <wayland-server-core.h>
 extern "C" {
@@ -10,7 +11,7 @@ void InputManager::newInputDeviceResponder(wl_listener *listener, void *data) {
   InputManager *self =
       wl_container_of(listener, self, m_newInputDeviceListener);
 
-  std::cout << "New input detected" << std::endl;
+  Log(Debug, "New input detected");
   auto *device = static_cast<struct wlr_input_device *>(data);
   switch (device->type) {
   case WLR_INPUT_DEVICE_KEYBOARD:
@@ -18,7 +19,7 @@ void InputManager::newInputDeviceResponder(wl_listener *listener, void *data) {
 
     break;
   case WLR_INPUT_DEVICE_POINTER:
-    std::cout << "New pointer detected" << std::endl;
+    Log(Debug, "New pointer detected");
     wlr_cursor_attach_input_device(self->m_cursorManager.m_cursor, device);
     self->m_cursorManager.m_device = device;
     break;

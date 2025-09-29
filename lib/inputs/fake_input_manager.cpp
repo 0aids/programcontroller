@@ -3,6 +3,7 @@
 // roblox).
 #include "fake_input_manager.hpp"
 #include "input.hpp"
+#include "log.hpp"
 #include <chrono>
 #include <ctime>
 #include <queue>
@@ -17,18 +18,48 @@ extern "C" {
 }
 
 InputInstructionFunc
-FakeInputManager::generateRelativeMouseInstruction(double dx, double dy) {
+FakeInputManager::generateRelativeMouseInstructionFunc(double dx, double dy) {
   time_t currTime;
   time(&currTime);
   auto func = [this, currTime, dx, dy]() -> void {
     auto *server = this->m_inputManager->m_parentServer;
 
-    std::cout << "dx: " << dx << "\tdy: " << dy << std::endl;
+    Log(Debug, "dx: " << dx << "\tdy: " << dy);
     wlr_relative_pointer_manager_v1_send_relative_motion(
         m_inputManager->m_cursorManager.m_relativePointerManager,
         m_inputManager->m_seat, currTime, dx, dy, dx, dy);
   };
   return func;
+}
+
+InputInstructionFunc
+FakeInputManager::generateKeyboardInstructionFunc(Keycode keycode,
+                                                  e_KeyState state) {
+  auto func = [this, keycode, state]() {
+    time_t currTime;
+    time(&currTime);
+    auto *seat = this->m_inputManager->m_seat;
+    wlr_seat_keyboard_notify_key(seat, currTime, keycode, state);
+  };
+  return func;
+}
+
+void FakeInputManager::holdKeyForDuration(Keycode keycode,
+                                          InputDurationNanoseconds duration,
+                                          InputDurationNanoseconds delay) {
+  // We'll send the higher-level seat notification.
+  auto now = std::chrono::steady_clock::now();
+  InputInstruction pressInstruction;
+  pressInstruction.function = generateKeyboardInstructionFunc(keycode, PRESS);
+  pressInstruction.processTime = now + delay;
+
+  InputInstruction releaseInstruction;
+  releaseInstruction.function =
+      generateKeyboardInstructionFunc(keycode, RELEASE);
+  releaseInstruction.processTime = now + delay + duration;
+
+  m_instructionQueue.enqueue(pressInstruction);
+  m_instructionQueue.enqueue(releaseInstruction);
 }
 
 FakeInputManager::FakeInputManager(InputManager *inputManager)
@@ -64,7 +95,7 @@ void FakeInputManager::moveMouseDeltaInterpolate(
   double newDy = (totalDy / numSamples);
   for (size_t i = 0; i < numSamples; i++) {
     instructions.push_back(InputInstruction{
-        .function = generateRelativeMouseInstruction(newDx, newDy),
+        .function = generateRelativeMouseInstructionFunc(newDx, newDy),
         .processTime = std::chrono::steady_clock::now() + interval * i + delay,
     });
   }
@@ -86,7 +117,7 @@ void FakeInputManager::watchAndProcessQueue() {
   // Process the queue
   using namespace std::chrono;
   duration waitDuration = nanoseconds::max();
-  std::cout << "Watching and processing queue!" << std::endl;
+  Log(Debug, "Watching and processing queue!");
   while (m_keepInputProcessingThreadAlive) {
 
     // Determine how long we should wait for.
@@ -104,7 +135,7 @@ void FakeInputManager::watchAndProcessQueue() {
 
         if (newReq.processTime == CLEARQUEUE_DURATION) {
           // Dump everything.
-          std::cout << "Clearing the queue" << std::endl;
+          Log(Debug, "Clearing the queue");
           pq = std::priority_queue<InputInstruction,
                                    std::vector<InputInstruction>,
                                    CompareInstruction>();
@@ -113,7 +144,7 @@ void FakeInputManager::watchAndProcessQueue() {
       }
     }
     if (!pq.empty()) {
-      std::cout << "Queue size: " << pq.size() << std::endl;
+      Log(Debug, "Queue size: " << pq.size());
       now = steady_clock::now();
     }
 
@@ -122,8 +153,7 @@ void FakeInputManager::watchAndProcessQueue() {
       InputInstruction instruction = pq.top();
       instruction.function();
       // The instructions are processed with <0.2ms delay.
-      std::cout << "Late by: " << steady_clock::now() - instruction.processTime
-                << "\n";
+      Log(Debug, "Late by: " << steady_clock::now() - instruction.processTime);
       pq.pop();
     }
   }
@@ -132,7 +162,7 @@ void FakeInputManager::watchAndProcessQueue() {
 void FakeInputManager::sendCursorTest() {
   using namespace std::chrono;
   const size_t numIter = 200;
-  std::cout << "Sending cursor test of size: " << numIter << std::endl;
+  Log(Debug, "Sending cursor test of size: " << numIter);
   std::vector<InputInstruction> instructions;
   auto now = std::chrono::steady_clock::now();
   instructions.reserve(numIter);
@@ -153,7 +183,7 @@ void FakeInputManager::sendCursorTest() {
 
   int i = 0;
   for (const auto &inst : instructions) {
-    std::cout << "Sending instruction: " << i++ << std::endl;
+    Log(Debug, "Sending instruction: " << i++);
     m_instructionQueue.enqueue(inst);
   }
 }

@@ -16,8 +16,8 @@ extern "C" {
 using Keycode = unsigned int;
 
 enum e_KeyState {
-  PRESS = WL_KEYBOARD_KEY_STATE_PRESSED,
-  RELEASE = WL_KEYBOARD_KEY_STATE_RELEASED,
+    PRESS   = WL_KEYBOARD_KEY_STATE_PRESSED,
+    RELEASE = WL_KEYBOARD_KEY_STATE_RELEASED,
 };
 
 // We need a struct to pass all the data of a move instruction.
@@ -37,57 +37,52 @@ enum e_KeyState {
 class InputManager;
 
 // Use for time_point if you want to clear the queue instantly.
-constexpr auto CLEARQUEUE_DURATION =
-    std::chrono::time_point<std::chrono::steady_clock,
-                            std::chrono::steady_clock::duration>{
-        std::chrono::steady_clock::duration{0}};
+constexpr auto CLEARQUEUE_DURATION = std::chrono::time_point<std::chrono::steady_clock, std::chrono::steady_clock::duration>{std::chrono::steady_clock::duration{0}};
 
 using InputInstructionFunc = std::function<void()>;
+
 struct InputInstruction {
-  InputInstructionFunc function;
-  std::chrono::steady_clock::time_point processTime;
+    InputInstructionFunc                  function;
+    std::chrono::steady_clock::time_point processTime;
 };
 
 using InputDurationNanoseconds = std::chrono::nanoseconds;
 
 class FakeInputManager {
 
-private:
-  InputManager *m_inputManager;
-  wlr_keyboard *m_keyboard;
-  wlr_cursor *m_cursor;
-  std::thread m_inputProcessingThread;
-  SPSCQueue<InputInstruction> m_instructionQueue;
-  bool m_keepInputProcessingThreadAlive;
+  private:
+    InputManager*               m_inputManager;
+    wlr_keyboard*               m_keyboard;
+    wlr_cursor*                 m_cursor;
+    std::thread                 m_inputProcessingThread;
+    SPSCQueue<InputInstruction> m_instructionQueue;
+    bool                        m_keepInputProcessingThreadAlive;
 
-  // If we send an instruction with timestamp 0, we clear the queue.
-  void watchAndProcessQueue();
+    // If we send an instruction with timestamp 0, we clear the queue.
+    void                 watchAndProcessQueue();
 
-  InputInstructionFunc generateRelativeMouseInstruction(double dx, double dy);
+    InputInstructionFunc generateRelativeMouseInstructionFunc(double dx, double dy);
 
-public:
-  FakeInputManager(InputManager *inputManager);
-  ~FakeInputManager();
-  void sendKey(Keycode keycode, e_KeyState state);
+    InputInstructionFunc generateKeyboardInstructionFunc(Keycode keycode, e_KeyState state);
 
-  void holdKeyForDuration(Keycode keycode, InputDurationNanoseconds duration,
-                          InputDurationNanoseconds delay);
+  public:
+    FakeInputManager(InputManager* inputManager);
+    ~FakeInputManager();
+    void sendKey(Keycode keycode, e_KeyState state);
 
-  void moveMouseDelta(double dx, double dy);
-  void moveMouseAbsolute(double x, double y);
+    void holdKeyForDuration(Keycode keycode, InputDurationNanoseconds duration, InputDurationNanoseconds delay);
 
-  void moveMouseDeltaInterpolate(double dx, double dy, size_t numSamples,
-                                 InputDurationNanoseconds duration,
-                                 InputDurationNanoseconds delay);
+    void moveMouseDelta(double dx, double dy);
+    void moveMouseAbsolute(double x, double y);
 
-  void moveMouseAbsoluteInterpolate(double x, double y, size_t numSamples,
-                                    InputDurationNanoseconds duration,
-                                    InputDurationNanoseconds delay);
+    void moveMouseDeltaInterpolate(double dx, double dy, size_t numSamples, InputDurationNanoseconds duration, InputDurationNanoseconds delay);
 
-  void sendTestInstruction();
-  void sendCursorTest();
+    void moveMouseAbsoluteInterpolate(double x, double y, size_t numSamples, InputDurationNanoseconds duration, InputDurationNanoseconds delay);
 
-  void killInputProcessingThread();
+    void sendTestInstruction();
+    void sendCursorTest();
 
-  void sendClearQueue();
+    void killInputProcessingThread();
+
+    void sendClearQueue();
 };

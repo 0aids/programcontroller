@@ -10,29 +10,31 @@ extern "C" {
 class WaylandServer;
 
 class OutputManager {
-public:
-  WaylandServer *m_parentServer;
-  wl_listener m_newOutputListener;
-  wlr_output_layout *m_outputLayout;
-  wl_list m_outputs_l;
+  public:
+    friend class WaylandServer;
 
-  static void newOutputHandler(wl_listener *listener, void *data);
-  void init(WaylandServer *parentServer, wl_display *display);
+    WaylandServer*     m_parentServer;
+    wl_listener        m_newOutputListener;
+    wlr_output_layout* m_outputLayout;
+    wl_list            m_outputs_l;
+
+    static void        newOutputHandler(wl_listener* listener, void* data);
+    void               init(WaylandServer* parentServer, wl_display* display);
 };
 
 class WaylandOutput {
-public:
-  wl_list m_link;
-  WaylandServer *m_parentServer;
-  wlr_output *m_output;
-  wl_listener m_newFrameListener;
-  wl_listener m_newStateListener;
-  wl_listener m_destroyRequestListener;
+  public:
+    wl_list        m_link;
+    WaylandServer* m_parentServer;
+    wlr_output*    m_output;
+    wl_listener    m_newFrameListener;
+    wl_listener    m_newStateListener;
+    wl_listener    m_destroyRequestListener;
 
-public:
-  void static newFrameResponder(wl_listener *listener, void *data);
-  void static newStateResponder(wl_listener *listener, void *data);
-  void static DestroyRequestResponder(wl_listener *listener, void *data);
+  public:
+    void static newFrameResponder(wl_listener* listener, void* data);
+    void static newStateResponder(wl_listener* listener, void* data);
+    void static DestroyRequestResponder(wl_listener* listener, void* data);
 
-  WaylandOutput(OutputManager *outputManager, wlr_output *output);
+    WaylandOutput(OutputManager* outputManager, wlr_output* output);
 };

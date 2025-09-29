@@ -1,6 +1,6 @@
 #include "cursors.hpp"
+#include "log.hpp"
 #include "server.hpp"
-#include <iterator>
 #include <wayland-server-core.h>
 
 extern "C" {
@@ -13,7 +13,7 @@ extern "C" {
 
 void CursorManager::cursorMotionResponder(wl_listener *listener, void *data) {
   CursorManager *self = wl_container_of(listener, self, m_cursorMotionListener);
-  // std::cout << "\rNew cursorMotion detected" << std::endl;
+  Log(Debug, "New cursorMotion detected");
   auto *mouseEvent = static_cast<struct wlr_pointer_motion_event *>(data);
 
   auto dx = mouseEvent->delta_x, dy = mouseEvent->delta_y;
@@ -34,7 +34,7 @@ void CursorManager::cursorMotionResponder(wl_listener *listener, void *data) {
       mouseEvent->delta_y, mouseEvent->unaccel_dx, mouseEvent->unaccel_dy);
 
   // This part is to ensure the game has focus at all times. I have no clue how
-  // it works
+  // it works, i just stole it from dwl.
   wl_list_for_each(constraint, &self->m_pointerConstraints->constraints, link) {
   }
   if (constraint &&
@@ -46,10 +46,11 @@ void CursorManager::cursorMotionResponder(wl_listener *listener, void *data) {
     wlr_surface *target_surface = main_view->m_topLevel->base->surface;
 
     double sx_confined, sy_confined;
+    // This part isn't even reached?? I never see the print statement
     if (wlr_region_confine(&constraint->region, sx, sy,
                            sx + mouseEvent->delta_x, sy + mouseEvent->delta_y,
                            &sx_confined, &sy_confined)) {
-      std::cout << "Would've been out of region, confining..." << std::endl;
+      Log(Debug, "Would've been out of region, confining...");
       dx = sx_confined - sx;
       dy = sx_confined - sy;
     }
@@ -70,7 +71,7 @@ void CursorManager::cursorMotionAbsoluteResponder(wl_listener *listener,
                                                   void *data) {
   CursorManager *self =
       wl_container_of(listener, self, m_cursorMotionAbsoluteListener);
-  // std::cout << "New cursorMotionAbsolute detected" << std::endl;
+  // Log(Debug, "New cursorMotionAbsolute detected");
 
   auto *mouseEvent =
       static_cast<struct wlr_pointer_motion_absolute_event *>(data);
@@ -82,7 +83,7 @@ void CursorManager::cursorMotionAbsoluteResponder(wl_listener *listener,
 
 void CursorManager::cursorButtonResponder(wl_listener *listener, void *data) {
   CursorManager *self = wl_container_of(listener, self, m_cursorButtonListener);
-  std::cout << "New cursorButton detected" << std::endl;
+  Log(Debug, "New cursorButton detected");
   auto *mouseEvent = static_cast<struct wlr_pointer_button_event *>(data);
 
   wlr_seat_pointer_notify_button(self->m_parentServer->m_inputManager.m_seat,
@@ -95,7 +96,7 @@ void CursorManager::requestSetCursorResponder(wl_listener *listener,
   CursorManager *self =
       wl_container_of(listener, self, m_requestSetCursorListener);
   auto *event = static_cast<wlr_seat_pointer_request_set_cursor_event *>(data);
-  std::cout << "New cursor set request" << std::endl;
+  Log(Debug, "New cursor set request");
 
   // This is the client asking to set the cursor.
   // We need to honor this request.
@@ -117,8 +118,7 @@ void CursorManager::newConstraintResponder(wl_listener *listener, void *data) {
   CursorManager *self =
       wl_container_of(listener, self, m_newConstraintListener);
   auto *constraint = static_cast<wlr_pointer_constraint_v1 *>(data);
-  std::cout << "New constraint received of type: " << constraint->type
-            << std::endl;
+  Log(Debug, "New constraint received of type: " << constraint->type);
 
   CursorConstraint *cursorConstraint = new CursorConstraint();
   cursorConstraint->m_constraint = constraint;
@@ -141,13 +141,13 @@ void CursorManager::init(WaylandServer *parentServer) {
   m_xcursorManager = wlr_xcursor_manager_create(NULL, 24);
 
   m_cursorMotionListener.notify = cursorMotionResponder;
-  // m_cursorMotionAbsoluteListener.notify = cursorMotionAbsoluteResponder;
+  m_cursorMotionAbsoluteListener.notify = cursorMotionAbsoluteResponder;
   m_cursorButtonListener.notify = cursorButtonResponder;
   m_requestSetCursorListener.notify = requestSetCursorResponder;
 
   wl_signal_add(&m_cursor->events.motion, &m_cursorMotionListener);
-  // wl_signal_add(&m_cursor->events.motion_absolute,
-  //               &m_cursorMotionAbsoluteListener);
+  wl_signal_add(&m_cursor->events.motion_absolute,
+                &m_cursorMotionAbsoluteListener);
   wl_signal_add(&m_cursor->events.button, &m_cursorButtonListener);
   wl_signal_add(
       &m_parentServer->m_inputManager.m_seat->events.request_set_cursor,

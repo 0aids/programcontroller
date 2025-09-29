@@ -42,7 +42,7 @@ build/interrim/lib/%.o: lib/%.cpp
 	$(CXX) $(DEV_FLAGS)  -o $@ $< -c $(INCLUDES) $(LINCLUDES)
 
 dirs:
-	mkdir -p build/bin build/interrim build/interrim/lib/inputs
+	mkdir -p build/bin build/interrim build/interrim/lib/inputs build/interrim/lib/memory_reader
 
 
 clean:

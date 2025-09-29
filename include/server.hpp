@@ -14,29 +14,29 @@ extern "C" {
 }
 
 class WaylandServer {
-public:
-  OutputManager m_outputManager;
+  public:
+    OutputManager    m_outputManager;
 
-  SceneManager m_sceneManager;
+    SceneManager     m_sceneManager;
 
-  InputManager m_inputManager;
+    InputManager     m_inputManager;
 
-  TopLevelsManager m_topLevelsManager;
+    TopLevelsManager m_topLevelsManager;
 
-  wl_display *m_display;
-  wlr_backend *m_backend;
-  wlr_renderer *m_renderer;
-  wlr_allocator *m_allocator;
-  wl_event_loop *m_eventLoop;
-  const char *waylandSocket;
+    wl_display*      m_display;
+    wlr_backend*     m_backend;
+    wlr_renderer*    m_renderer;
+    wlr_allocator*   m_allocator;
+    wl_event_loop*   m_eventLoop;
+    const char*      waylandSocket;
 
-public:
-  WaylandServer(/* No options for now*/);
-  ~WaylandServer(/* No options for now*/);
+  public:
+    WaylandServer(/* No options for now*/);
+    ~WaylandServer(/* No options for now*/);
 
-  // Start the backend, renderer, allocator and displays.
-  void start();
+    // Start the backend, renderer, allocator and displays.
+    void start();
 
-  // Start the main event loop
-  void loop();
+    // Start the main event loop
+    void loop();
 };

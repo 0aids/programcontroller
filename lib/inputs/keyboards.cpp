@@ -1,4 +1,5 @@
 #include "keyboards.hpp"
+#include "log.hpp"
 #include "server.hpp"
 
 extern "C" {
@@ -11,7 +12,7 @@ void KeyboardManager::keyboardInputResponder(wl_listener *listener,
                                              void *data) {
   KeyboardManager *self =
       wl_container_of(listener, self, m_keyboardInputListener);
-  std::cout << "New keyboard input detected" << std::endl;
+  Log(Debug, "New keyboard input detected");
 
   auto *event = static_cast<struct wlr_keyboard_key_event *>(data);
   auto *keyboard =
@@ -30,7 +31,7 @@ void KeyboardManager::init(WaylandServer *parentServer) {
 void KeyboardManager::newKeyboardResponder(wlr_input_device *device) {
 
   wlr_keyboard *keyboard;
-  std::cout << "New keyboard detected" << std::endl;
+  Log(Debug, "New keyboard detected");
   keyboard = wlr_keyboard_from_input_device(device);
   auto *xkbContext = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
   auto *xkbKeymap =

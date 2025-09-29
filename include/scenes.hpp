@@ -9,10 +9,10 @@ extern "C" {
 class WaylandServer;
 
 class SceneManager {
-public:
-  WaylandServer *m_parentServer;
-  wlr_scene *m_scene;
-  wlr_scene_output_layout *m_sceneLayout;
+  public:
+    WaylandServer*           m_parentServer;
+    wlr_scene*               m_scene;
+    wlr_scene_output_layout* m_sceneLayout;
 
-  void init(WaylandServer *parentServer);
+    void                     init(WaylandServer* parentServer);
 };
