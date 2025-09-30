@@ -4,7 +4,14 @@ extern "C" {
 #include <wayland-util.h>
 #include <wlr/types/wlr_seat.h>
 }
+
 class WaylandServer;
+
+/* Externally required:
+ *      wlr_seat
+ *      top_levels (For notify_enter)
+ *      
+ * */
 
 class KeyboardManager {
   public:
@@ -14,7 +21,8 @@ class KeyboardManager {
     // Also notifiers and shit.
     wl_listener m_keyboardInputListener;
 
-    static void keyboardInputResponder(wl_listener* listener, void* data);
+    static void keyboardInputResponder(wl_listener* listener,
+                                       void*        data);
 
     // Not a satic method
     void newKeyboardResponder(wlr_input_device* device);

@@ -10,6 +10,11 @@ extern "C" {
 
 class WaylandServer;
 
+/* Externally required:
+ *      wl_display      (for creating the xdg_shell)
+ *      
+ * */
+
 class TopLevelsManager {
   public:
     WaylandServer* m_parentServer;
@@ -21,10 +26,25 @@ class TopLevelsManager {
     wlr_xdg_shell* m_xdgShell;
 
   public:
-    static void newTopLevelResponder(wl_listener* listener, void* data);
-    static void newTopLevelPopupResponder(wl_listener* listener, void* data);
+    static void newTopLevelResponder(wl_listener* listener,
+                                     void*        data);
+    static void newTopLevelPopupResponder(wl_listener* listener,
+                                          void*        data);
     void        init(WaylandServer* parentServer);
 };
+
+/* Externally required:
+ *      OutputManager . wlr_output_layout       (We need to get an
+ *          OR                                      output to commit to)
+ *      wlr_output                          
+ *
+ *      CursorManager . wlr_cursor              (Finding coordinates to 
+ *                                                  be focused)
+ *      InputManager . wlr_seat                 (Keyboard & pointer Notify enter)
+ *      
+ *      SceneManager . wlr_scene . wlr_scene_tree (To create the xdg_surface)
+ *      
+ * */
 
 class TopLevelView {
   public:
@@ -45,5 +65,6 @@ class TopLevelView {
   public:
     static void commitResponder(wl_listener* listener, void* data);
 
-    TopLevelView(WaylandServer* parentServer, wlr_xdg_toplevel* topLevel);
+    TopLevelView(WaylandServer*    parentServer,
+                 wlr_xdg_toplevel* topLevel);
 };

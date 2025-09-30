@@ -1,19 +1,23 @@
 // Just a basic logging system.
+// Has the feature of understanding repeated logging (IE every frame), and will
+// update the last row that had such a thing with a count.
 #pragma once
-#include <iomanip>
-#include <iostream>
-#include <ostream>
-#include <sstream> // Required for stringstream
+
+#include <array>
+#include <optional>
+#include <sstream>
 #include <string>
+#include <string_view>
 
-// --- Color Codes ---
-const char* const RESET_COLOR  = "\033[0m";
-const char* const RED_COLOR    = "\033[31m";
-const char* const YELLOW_COLOR = "\033[33m";
-const char* const BLUE_COLOR   = "\033[34m";
-const char* const GREY_COLOR   = "\033[90m";
+// ANSI color codes for terminal output.
+const std::string RESET_COLOR  = "\033[0m";
+const std::string RED_COLOR    = "\033[31m";
+const std::string YELLOW_COLOR = "\033[33m";
+const std::string BLUE_COLOR   = "\033[34m";
+const std::string GREY_COLOR   = "\033[90m";
 
-// --- Log Levels ---
+constexpr size_t  LOG_LENGTH = 10;
+
 enum LogLevel {
     Error,   // Critical errors
     Warning, // Potential issues
@@ -22,180 +26,72 @@ enum LogLevel {
     Debug    // Granular debugging information
 };
 
-// --- Null Stream for Discarding Logs ---
-class NullBuffer : public std::streambuf {
-  public:
-    int overflow(int c) override {
-        return c;
-    }
+struct LogEntry {
+    std::string string;
+    size_t      hash;
+    size_t      count = 1;
 };
-static NullBuffer   null_buffer;
-static std::ostream cnull(&null_buffer);
 
-// --- Logger Class ---
-class LogStreamWrapper; // Forward declaration
-
-class Logger {
-  public:
-    friend class LogStreamWrapper; // Allow wrapper to access private members
-
-    // Init
-    static void initlogger(LogLevel level);
-
-    static void setLevel(LogLevel newLevel) {
-        flush(); // Finalize any pending repeated log before changing level
-        currentLevel = newLevel;
-    }
-
-    static void setMode(std::ios_base::fmtflags flags) {
-        s_nextLogFlags = flags;
-        s_modeIsSet    = true;
-    }
-
-    // Call this before your program exits to finalize any repeated log lines.
-    static void flush() {
-        if (s_repeatCount > 1) {
-            std::cout << std::endl;
-        }
-        s_lastSignature = "";
-        s_repeatCount   = 0;
-    }
-
-    static LogStreamWrapper log(LogLevel level, const char* file, const char* func);
-
+// A circular array which stores the last LOG_LENGTH log entries.
+class LogsList {
   private:
-    // This function contains the core logic for coalescing logs
-    static void                    commit(const std::string& prefix, const std::string& content);
+    std::array<LogEntry, LOG_LENGTH> m_logs;
+    size_t m_index = 0; // Points to the next empty slot
+    size_t m_count = 0; // Number of valid entries in the buffer
 
-    static LogLevel                currentLevel;
-    static std::ios_base::fmtflags s_nextLogFlags;
-    static bool                    s_modeIsSet;
-
-    // Static members for tracking repeated logs
-    static std::string s_lastSignature;
-    static size_t      s_repeatCount;
+  public:
+    // If a message is repeated, increments its counter; otherwise, adds it.
+    void pushBack(std::string str);
+    // Pushes a new message without checking for repetition.
+    void pushBackNoCheck(std::string str);
 };
 
-class LogStreamWrapper {
+class LoggerWrapper {
+  private:
+    std::optional<std::stringstream> m_ss;
+    LogsList*                        m_logsList  = nullptr;
+    bool                             m_checkLast = true;
+
   public:
-    LogStreamWrapper(std::ostream& stream, bool applyFormatting, std::ios_base::fmtflags flags, const std::string& prefix) :
-        m_stream(stream), m_applyFormatting(applyFormatting), m_prefix(prefix) {
-        if (m_applyFormatting) {
-            m_originalFlags = m_stream.flags();
-            m_stream.flags(flags);
-        }
-    }
+    LoggerWrapper(LogsList* logsList, bool checkLast, LogLevel level,
+                  std::string_view filename,
+                  std::string_view functionName);
+    LoggerWrapper() = default;
+    ~LoggerWrapper();
 
-    ~LogStreamWrapper() {
-        // On destruction, commit the buffered content to the Logger
-        if (&m_stream != &cnull) {
-            Logger::commit(m_prefix, m_buffer.str());
-        }
-        // Restore stream flags if they were changed
-        if (m_applyFormatting) {
-            m_stream.flags(m_originalFlags);
-        }
-    }
-
+    // Stream operator to append data to the log message.
     template <typename T>
-    LogStreamWrapper& operator<<(const T& msg) {
-        m_buffer << msg; // Buffer the message instead of writing directly
+    LoggerWrapper& operator<<(const T& in) {
+        if (m_ss) {
+            *m_ss << in;
+        }
         return *this;
     }
-
-  private:
-    std::ostream&           m_stream;
-    std::ios_base::fmtflags m_originalFlags;
-    bool                    m_applyFormatting;
-    std::string             m_prefix;
-    std::stringstream       m_buffer; // Internal buffer for the message
 };
 
-// --- Logger Method Implementations ---
-inline LogStreamWrapper Logger::log(LogLevel level, const char* file, const char* func) {
-    if (level > currentLevel) {
-        return LogStreamWrapper(cnull, false, {}, "");
-    }
+class Logger {
+  private:
+    static LogsList m_logsList;
+    // Messages with a level higher than this will be ignored.
+    constexpr static LogLevel m_logLevel = LogLevel::Error;
 
-    std::ostream& stream = (level == LogLevel::Error) ? std::cerr : std::cout;
+  public:
+    // Creates a LoggerWrapper to stream the log message into.
+    static LoggerWrapper log(LogLevel         level,
+                             std::string_view filename,
+                             std::string_view functionName,
+                             bool             checkLast);
+};
 
-    // Build the prefix string
-    std::string levelStr;
-    const char* colorCode = "";
-    switch (level) {
-        case LogLevel::Error:
-            levelStr  = "ERROR";
-            colorCode = RED_COLOR;
-            break;
-        case LogLevel::Warning:
-            levelStr  = "WARNING";
-            colorCode = YELLOW_COLOR;
-            break;
-        case LogLevel::Message:
-            levelStr  = "MESSAGE";
-            colorCode = BLUE_COLOR;
-            break;
-        case LogLevel::Verbose:
-            levelStr  = "VERBOSE";
-            colorCode = "";
-            break;
-        case LogLevel::Debug:
-            levelStr  = "DEBUG";
-            colorCode = GREY_COLOR;
-            break;
-    }
+// --- Logging Macros ---
 
-    std::string filename(file);
-    size_t      last_slash = filename.find_last_of("/\\");
-    if (last_slash != std::string::npos) {
-        filename = filename.substr(last_slash + 1);
-    }
+// Logs a message, checking for repetition to update a counter.
+#define Log(level, msg)                                              \
+    { (Logger::log)(level, __FILE__, __func__, true) << msg; }
 
-    std::stringstream prefix_ss;
-    prefix_ss << colorCode << "[" << std::setw(7) << std::left << levelStr << "] "
-              << "[" << filename << ":" << func << "] ";
+// Logs a message every time, without checking for repetition.
+#define Log_f(level, msg)                                            \
+    { (Logger::log)(level, __FILE__, __func__, false) << msg; }
 
-    if (s_modeIsSet) {
-        s_modeIsSet = false;
-        return LogStreamWrapper(stream, true, s_nextLogFlags, prefix_ss.str());
-    }
-    return LogStreamWrapper(stream, false, {}, prefix_ss.str());
-}
-
-inline void Logger::commit(const std::string& prefix, const std::string& content) {
-    std::string currentSignature = prefix + content;
-
-    if (s_lastSignature == currentSignature) {
-        // Repeated log: Overwrite the previous line with the new count.
-        s_repeatCount++;
-        std::cout << "\r" << prefix << content << " (count: " << s_repeatCount << ")" << RESET_COLOR << std::flush;
-    } else {
-        // New log: Finalize the previous line (if there was one) and print the new
-        // one.
-        if (!s_lastSignature.empty()) {
-            std::cout << std::endl;
-        }
-        std::cout << prefix << content << RESET_COLOR << std::flush;
-        s_lastSignature = currentSignature;
-        s_repeatCount   = 1;
-    }
-}
-
-// --- Macros ---
-#define Log(level, msg) (Logger::log)(level, __FILE__, __func__) << msg
-
-#define Log_var(level, var) Log(level, #var << " = " << var)
-
-#define Log_mode(level, mode, msg)                                                                                                                                                 \
-    {                                                                                                                                                                              \
-        Logger::setMode(mode);                                                                                                                                                     \
-        Log(level, msg);                                                                                                                                                           \
-    }
-
-#define Log_modevar(level, mode, var)                                                                                                                                              \
-    {                                                                                                                                                                              \
-        Logger::setMode(mode);                                                                                                                                                     \
-        Log_var(level, var);                                                                                                                                                       \
-    }
-
-#define HEX_AND_SHOWBASE std::ios_base::hex | std::ios_base::showbase
+// Logs a variable's name and its value.
+#define Log_var(level, var) Log(level, #var " = " << var)

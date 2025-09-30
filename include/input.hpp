@@ -9,6 +9,10 @@ extern "C" {
 }
 
 class WaylandServer;
+/* Externally required:
+ *      backend -> events . new_input
+ *
+ * */
 
 class InputManager {
   public:
@@ -19,7 +23,8 @@ class InputManager {
 
     wl_listener     m_newInputDeviceListener;
 
-    static void     newInputDeviceResponder(wl_listener* listener, void* data);
+    static void     newInputDeviceResponder(wl_listener* listener,
+                                            void*        data);
 
     void            init(WaylandServer* parentServer);
 };

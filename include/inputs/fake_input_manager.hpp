@@ -37,7 +37,10 @@ enum e_KeyState {
 class InputManager;
 
 // Use for time_point if you want to clear the queue instantly.
-constexpr auto CLEARQUEUE_DURATION = std::chrono::time_point<std::chrono::steady_clock, std::chrono::steady_clock::duration>{std::chrono::steady_clock::duration{0}};
+constexpr auto CLEARQUEUE_DURATION =
+    std::chrono::time_point<std::chrono::steady_clock,
+                            std::chrono::steady_clock::duration>{
+        std::chrono::steady_clock::duration{0}};
 
 using InputInstructionFunc = std::function<void()>;
 
@@ -47,6 +50,16 @@ struct InputInstruction {
 };
 
 using InputDurationNanoseconds = std::chrono::nanoseconds;
+
+/* Externally required:
+ *      CursorManager . wlr_relative_pointer_manager_v1
+ *      CursorManager . wlr_cursor
+ *      InputManager -> wlr_seat
+ *
+ *      MAYBE
+ *      KeyboardManager (but the seat is all that's needed to send keys).
+ *      
+ * */
 
 class FakeInputManager {
 
@@ -59,25 +72,37 @@ class FakeInputManager {
     bool                        m_keepInputProcessingThreadAlive;
 
     // If we send an instruction with timestamp 0, we clear the queue.
-    void                 watchAndProcessQueue();
+    void watchAndProcessQueue();
 
-    InputInstructionFunc generateRelativeMouseInstructionFunc(double dx, double dy);
+    InputInstructionFunc
+    generateRelativeMouseInstructionFunc(double dx, double dy);
 
-    InputInstructionFunc generateKeyboardInstructionFunc(Keycode keycode, e_KeyState state);
+    InputInstructionFunc
+    generateKeyboardInstructionFunc(Keycode    keycode,
+                                    e_KeyState state);
 
   public:
     FakeInputManager(InputManager* inputManager);
     ~FakeInputManager();
     void sendKey(Keycode keycode, e_KeyState state);
 
-    void holdKeyForDuration(Keycode keycode, InputDurationNanoseconds duration, InputDurationNanoseconds delay);
+    void holdKeyForDuration(Keycode                  keycode,
+                            InputDurationNanoseconds duration,
+                            InputDurationNanoseconds delay);
 
     void moveMouseDelta(double dx, double dy);
     void moveMouseAbsolute(double x, double y);
 
-    void moveMouseDeltaInterpolate(double dx, double dy, size_t numSamples, InputDurationNanoseconds duration, InputDurationNanoseconds delay);
+    void moveMouseDeltaInterpolate(double dx, double dy,
+                                   size_t numSamples,
+                                   InputDurationNanoseconds duration,
+                                   InputDurationNanoseconds delay);
 
-    void moveMouseAbsoluteInterpolate(double x, double y, size_t numSamples, InputDurationNanoseconds duration, InputDurationNanoseconds delay);
+    void
+         moveMouseAbsoluteInterpolate(double x, double y,
+                                      size_t                   numSamples,
+                                      InputDurationNanoseconds duration,
+                                      InputDurationNanoseconds delay);
 
     void sendTestInstruction();
     void sendCursorTest();

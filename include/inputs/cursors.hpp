@@ -5,14 +5,23 @@ extern "C" {
 #include <wlr/types/wlr_pointer_constraints_v1.h>
 #include <wlr/types/wlr_relative_pointer_v1.h>
 }
-
 class WaylandServer;
+
+/* Externally required:
+ *      wlr_scene -> tree . node
+ *      wlr_seat
+ *      wlr_seat events
+ *      wl_display
+ *      TopLevelsManager . m_topLevels_l (Top levels list)
+ *      wlr_output_layout
+ *
+ * */
 
 struct CursorConstraint {
     wlr_pointer_constraint_v1* m_constraint;
     wl_listener                m_destroyListener;
 
-    static void                destroyResponder(wl_listener* listener, void* data);
+    static void destroyResponder(wl_listener* listener, void* data);
 };
 
 class CursorManager {
@@ -32,14 +41,19 @@ class CursorManager {
     wlr_pointer_constraints_v1*      m_pointerConstraints;
     wl_listener                      m_newConstraintListener;
 
-    static void                      cursorMotionResponder(wl_listener* listener, void* data);
-    static void                      cursorMotionAbsoluteResponder(wl_listener* listener, void* data);
-    static void                      cursorButtonResponder(wl_listener* listener, void* data);
-    static void                      requestSetCursorResponder(wl_listener* listener, void* data);
+    static void cursorMotionResponder(wl_listener* listener,
+                                      void*        data);
+    static void cursorMotionAbsoluteResponder(wl_listener* listener,
+                                              void*        data);
+    static void cursorButtonResponder(wl_listener* listener,
+                                      void*        data);
+    static void requestSetCursorResponder(wl_listener* listener,
+                                          void*        data);
 
-    static void                      newConstraintResponder(wl_listener* listener, void* data);
+    static void newConstraintResponder(wl_listener* listener,
+                                       void*        data);
 
-    void                             init(WaylandServer* parentServer);
+    void        init(WaylandServer* parentServer);
 
     // wl_listener m_cursorAxisListener;
     // wl_listener m_cursorFrameListener;

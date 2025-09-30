@@ -5,6 +5,12 @@ extern "C" {
 #include <wlr/types/wlr_scene.h>
 #undef static
 }
+/* Externally required:
+ *      OutputManager . wlr_outputLayout      (attached to an output layout)
+ *
+ * Note: This is required by quite a few.
+ *      
+ * */
 
 class WaylandServer;
 
