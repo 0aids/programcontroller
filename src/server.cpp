@@ -1,17 +1,8 @@
-// TODO: Switch to headless.
-extern "C" {
-#include <wlr/backend.h>
-#include <wlr/render/allocator.h>
-#include <wlr/render/wlr_renderer.h>
-#include <wlr/types/wlr_compositor.h>
-#include <wlr/types/wlr_data_device.h>
-#include <wlr/types/wlr_subcompositor.h>
-#include <wlr/util/log.h>
-}
 #include "log.hpp"
 #include "server.hpp"
 
-WaylandServer::WaylandServer() {
+void WLR_State::Core::init() {
+    Log(Debug, "Initializing WLR_State Core.");
     m_display = wl_display_create();
 
     if (!m_display) {
@@ -50,57 +41,110 @@ WaylandServer::WaylandServer() {
         exit(EXIT_FAILURE);
     }
 
-    wlr_compositor_create(m_display, 5, m_renderer);
-    wlr_subcompositor_create(m_display);
-    wlr_data_device_manager_create(m_display);
+    m_compositor    = wlr_compositor_create(m_display, 5, m_renderer);
+    m_subCompositor = wlr_subcompositor_create(m_display);
+    m_dataDeviceManager = wlr_data_device_manager_create(m_display);
 
-    // NOTE: Initialize the output and its manager
-    m_outputManager.init(this, m_display);
-
-    // NOTE: Scene initialization
-    m_sceneManager.init(this);
-
-    // NOTE: Toplevel and shell initialization
-    m_topLevelsManager.init(this);
-
-    // NOTE: Input initialization
-    m_inputManager.init(this);
+    m_seat = wlr_seat_create(m_display, "seat99");
 }
 
-WaylandServer::~WaylandServer() {
-    // Do nothing for now
+void WLR_State::Outputs::init(WLR_State& state) {
+    Log(Debug, "Initializing WLR_State Output.");
+    wl_list_init(&m_outputs_l);
+    m_outputLayout = wlr_output_layout_create(state.Core.m_display);
 }
 
-void WaylandServer::start() {
-    waylandSocket = wl_display_add_socket_auto(m_display);
+void WLR_State::Scenes::init(WLR_State& state) {
+    Log(Debug, "Initializing WLR_State Scenes.");
+    m_scene       = wlr_scene_create();
+    m_sceneLayout = wlr_scene_attach_output_layout(
+        m_scene, state.Outputs.m_outputLayout);
+}
 
-    if (!waylandSocket) {
-        wlr_backend_destroy(m_backend);
+void WLR_State::TopLevels::init(WLR_State& state) {
+    Log(Debug, "Initializing WLR_State Toplevels.");
+    wl_list_init(&m_topLevels_l);
+    m_xdgShell = wlr_xdg_shell_create(state.Core.m_display, 3);
+}
+
+void WLR_State::Cursors::init(WLR_State& state) {
+    Log(Debug, "Initializing WLR_State Cursors.");
+    m_cursor = wlr_cursor_create();
+    wlr_cursor_attach_output_layout(m_cursor,
+                                    state.Outputs.m_outputLayout);
+
+    m_xcursorManager = wlr_xcursor_manager_create(NULL, 24);
+
+    m_pointerConstraints =
+        wlr_pointer_constraints_v1_create(state.Core.m_display);
+
+    m_relativePointerManager =
+        wlr_relative_pointer_manager_v1_create(state.Core.m_display);
+}
+
+void WLR_State::Keyboards::init(WLR_State& state) {
+    Log(Debug, "Initializing WLR_State keyboards.");
+    wl_list_init(&m_keyboards_l);
+}
+
+void WLR_State::init() {
+    Log(Debug, "Initializing WLR_State.");
+    Core.init();
+
+    Outputs.init(*this);
+
+    Scenes.init(*this);
+
+    TopLevels.init(*this);
+
+    Cursors.init(*this);
+
+    Keyboards.init(*this);
+}
+
+WLR_State::~WLR_State() {
+    Log(Debug, "Destroying WLR_State.");
+    wl_display_destroy_clients(Core.m_display);
+    wlr_scene_node_destroy(&Scenes.m_scene->tree.node);
+    wlr_xcursor_manager_destroy(Cursors.m_xcursorManager);
+    wlr_cursor_destroy(Cursors.m_cursor);
+    wlr_allocator_destroy(Core.m_allocator);
+    wlr_renderer_destroy(Core.m_renderer);
+    wlr_backend_destroy(Core.m_backend);
+    wl_display_destroy(Core.m_display);
+}
+
+void WLR_State::start() {
+    Log(Debug, "Starting WLR_State.");
+    m_waylandSocket = wl_display_add_socket_auto(Core.m_display);
+
+    if (!m_waylandSocket) {
+        wlr_backend_destroy(Core.m_backend);
         Log(Error, "Failed to initialise the wayland socket.");
         exit(EXIT_FAILURE);
     }
 
     /* Start the backend. This will enumerate outputs and inputs, become the DRM
    * master, etc */
-    if (!wlr_backend_start(m_backend)) {
-        wlr_backend_destroy(m_backend);
-        wl_display_destroy(m_display);
+    if (!wlr_backend_start(Core.m_backend)) {
+        wlr_backend_destroy(Core.m_backend);
+        wl_display_destroy(Core.m_display);
         Log(Error, "Failed to start the backend.");
         exit(EXIT_FAILURE);
     }
 
     /* Set the WAYLAND_DISPLAY environment variable to our socket and run the
    * startup command if requested. */
-    setenv("WAYLAND_DISPLAY", waylandSocket, true);
+    setenv("WAYLAND_DISPLAY", m_waylandSocket, true);
     Log(Message,
         "Running Wayland compositor on WAYLAND_DISPLAY="
-            << waylandSocket);
+            << m_waylandSocket);
 }
 
-void WaylandServer::loop() {
+void WLR_State::loop() {
     Log(Debug, "Running the main loop");
     while (1) {
-        wl_event_loop_dispatch(m_eventLoop, -1);
-        wl_display_flush_clients(m_display);
+        wl_event_loop_dispatch(Core.m_eventLoop, -1);
+        wl_display_flush_clients(Core.m_display);
     }
 }

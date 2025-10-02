@@ -55,7 +55,7 @@ class LoggerWrapper {
   public:
     LoggerWrapper(LogsList* logsList, bool checkLast, LogLevel level,
                   std::string_view filename,
-                  std::string_view functionName);
+                  std::string_view functionName, size_t lineNumber);
     LoggerWrapper() = default;
     ~LoggerWrapper();
 
@@ -73,25 +73,31 @@ class Logger {
   private:
     static LogsList m_logsList;
     // Messages with a level higher than this will be ignored.
-    constexpr static LogLevel m_logLevel = LogLevel::Error;
+    inline static LogLevel m_logLevel = LogLevel::Error;
 
   public:
     // Creates a LoggerWrapper to stream the log message into.
     static LoggerWrapper log(LogLevel         level,
                              std::string_view filename,
                              std::string_view functionName,
-                             bool             checkLast);
+                             size_t lineNumber, bool checkLast);
 };
 
 // --- Logging Macros ---
 
 // Logs a message, checking for repetition to update a counter.
 #define Log(level, msg)                                              \
-    { (Logger::log)(level, __FILE__, __func__, true) << msg; }
+    {                                                                \
+        (Logger::log)(level, __FILE__, __func__, __LINE__, true)     \
+            << msg;                                                  \
+    }
 
 // Logs a message every time, without checking for repetition.
 #define Log_f(level, msg)                                            \
-    { (Logger::log)(level, __FILE__, __func__, false) << msg; }
+    {                                                                \
+        (Logger::log)(level, __FILE__, __func__, __LINE__, false)    \
+            << msg;                                                  \
+    }
 
 // Logs a variable's name and its value.
 #define Log_var(level, var) Log(level, #var " = " << var)

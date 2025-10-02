@@ -1,0 +1,49 @@
+info: Roblox: 2025-10-02T11:04:30.306Z,47.306583,149ff6c0,6 [FLog::DataModelPatchConfigurer] [discovery-ota] Update OTA config
+info: Roblox: 2025-10-02T11:04:30.527Z,47.527962,29f96c0,6 [FLog::DataModelPatchConfigurer] [discovery-ota] Update OTA succeeded: {"SchemaVersion":"1","CanaryUserIds":[],"CanaryPercentage":0}
+info: Roblox: 2025-10-02T11:04:30.528Z,47.528091,29f96c0,6 [FLog::DataModelPatchConfigurer] [discovery-ota] Update OTA config not deployed
+info: Roblox: 2025-10-02T11:04:45.311Z,62.311413,39fb6c0,12 [DFLog::HttpTraceError] CURLOPT_ERRORBUFFER: Connection timed out after 60000 milliseconds
+info: Roblox: 2025-10-02T11:04:45.311Z,62.311665,29f96c0,6 [DFLog::WebSocketTraceError] ws: 1 url: http://10.0.2.2:5051 error: HttpError: Timedout
+info: Roblox: 2025-10-02T11:04:45.311Z,62.311813,29f96c0,12 [DFLog::HttpTraceError] HttpResponse(#10 0x7f1c2d16bab0) time:59999.2ms (net:59999.2ms callback:0.1ms timeInRetryQueue:0.0ms) error:5 message:HttpError: Timedout url:{ "http://10.0.2.2:5051" } ip: external:0 numberOfTimesRetried:0
+ERROR: Wayland display connection closed by server (fatal)
+info: app: lifecycle: will_do_clean_exit delta=104974.95192399621ms
+debug: rbx.AppBridgeV2: nativeAppBridgeV2LeaveGame:
+info: Roblox: 2025-10-02T11:05:29.416Z,106.416237,b9fe6c0,6 [FLog::SingleSurfaceApp] leaveUGCGame: (stage:UGCGame) blocking=1.
+info: Roblox: 2025-10-02T11:05:29.416Z,106.416321,b9fe6c0,6 [FLog::SingleSurfaceApp] leaveUGCGameInternal
+info: Roblox: 2025-10-02T11:05:29.416Z,106.416374,b9fe6c0,6,Warning [FLog::SurfaceController] SurfaceController[_:1]::pause destroyView:false.
+info: Roblox: 2025-10-02T11:05:29.416Z,106.416435,b9fe6c0,6 [FLog::SurfaceController] stop
+info: Roblox: 2025-10-02T11:05:29.416Z,106.416481,b9fe6c0,6 [FLog::SurfaceController] drainRenderingJobs
+info: Roblox: 2025-10-02T11:05:29.417Z,106.417046,14dff6c0,6 [FLog::SurfaceController] SurfaceController::RenderJob[_:2]::~RenderJob
+info: Roblox: 2025-10-02T11:05:29.562Z,106.562820,b9fe6c0,6,Info [FLog::UgcExperienceController] UgcExperienceController: destroyCaptureModeDataModelIfExists: begin
+info: Roblox: 2025-10-02T11:05:29.562Z,106.562889,b9fe6c0,6,Info [FLog::UgcExperienceController] UgcExperienceController: destroyCaptureModeDataModelIfExists: end
+info: Roblox: 2025-10-02T11:05:29.562Z,106.562935,b9fe6c0,6,Info [FLog::UgcExperienceController] UgcExperienceController: stop: begin (blocking=true dataModel=0x7f1c3a1d0ca0)
+info: Roblox: 2025-10-02T11:05:29.572Z,106.572960,b9fe6c0,7 [FLog::Network] Client:Disconnect
+info: Roblox: 2025-10-02T11:05:29.575Z,106.575134,b9fe6c0,6 [FLog::Warning] Warning: Failed to translate string with key: InGame.ConnectionError.DisconnectClientRequest
+info: Roblox: 2025-10-02T11:05:29.576Z,106.576843,b9fe6c0,6,Info [FLog::AppMemUsageStatus] 3784003596.0
+info: Roblox: 2025-10-02T11:05:29.578Z,106.578751,b9fe6c0,7 [FLog::Network] Time to disconnect replication data: 1.278176
+info: Roblox: 2025-10-02T11:05:29.579Z,106.579697,b9fe6c0,7 [FLog::Network] Sending disconnect with reason: 285
+info: Roblox: 2025-10-02T11:05:29.579Z,106.579773,b9fe6c0,7 [FLog::Network] Sending disconnect with reason: 285
+info: Roblox: 2025-10-02T11:05:29.579Z,106.579834,ef5a0b40,7 [FLog::Network] Sending disconnect with reason: 285
+info: Roblox: 2025-10-02T11:05:30.732Z,107.732773,b9fe6c0,6,Info [FLog::AudioFocusService] AudioFocusService onServiceProvider invokation
+info: Roblox: 2025-10-02T11:05:30.732Z,107.732826,b9fe6c0,6,Info [FLog::AudioFocusService] AudioFocusService::AudioFocusService() onServiceProvider teardown
+info: Roblox: 2025-10-02T11:05:30.733Z,107.733757,b9fe6c0,7 [FLog::Network] Client:Disconnect
+info: Roblox: 2025-10-02T11:05:30.924Z,107.924545,b9fe6c0,6,Info [FLog::AudioFocusService] AudioFocusService::AudioFocusService() destructor
+info: Roblox: 2025-10-02T11:05:30.924Z,107.924660,b9fe6c0,7 [FLog::Network] NetworkClient:Remove
+info: Roblox: 2025-10-02T11:05:30.924Z,107.924713,b9fe6c0,7 [DFLog::MegaReplicatorLogDisconnectCleanUpLog] Destroying MegaReplicator.
+info: Roblox: 2025-10-02T11:05:31.305Z,108.305252,b9fe6c0,6,Info [FLog::UgcExperienceController] UgcExperienceController: sendAnalyticsBeforeLeave: sending event None_None
+info: Roblox: 2025-10-02T11:05:31.305Z,108.305351,b9fe6c0,6,Info [FLog::CrossExperienceVoiceController] CrossExperienceVoiceController: onCoordinatorTransitionEvent Stopped - Ugc
+info: Roblox: 2025-10-02T11:05:31.305Z,108.305382,b9fe6c0,6,Info [FLog::CrossExperienceVoiceController] CrossExperienceVoiceController: removing all observers for type Ugc
+info: Roblox: 2025-10-02T11:05:31.305Z,108.305603,14dff6c0,7 [FLog::Network] Replicator destroyed: 0x7f1c66a1c0e0
+info: Roblox: 2025-10-02T11:05:31.307Z,108.307480,b9fe6c0,6 [FLog::SingleSurfaceApp] setStage: (stage:Native)
+debug: rbx.AppBridgeV2: nativeAppBridgeV2DestroyApp:
+info: Roblox: 2025-10-02T11:05:31.307Z,108.307640,b9fe6c0,6 [FLog::SingleSurfaceApp] destroyLuaApp: (stage:Native) blocking:true.
+info: Roblox: 2025-10-02T11:05:31.307Z,108.307686,b9fe6c0,6,Warning [FLog::CrossExperienceVoiceController] CrossExperienceVoiceController: finalize: Did not finalize due to state.
+info: Roblox: 2025-10-02T11:05:31.307Z,108.307732,b9fe6c0,6,Info [FLog::UgcExperienceController] UgcExperienceController: finalized
+info: Roblox: 2025-10-02T11:05:31.480Z,108.480919,b9fe6c0,6,Info [FLog::AudioFocusService] AudioFocusService onServiceProvider invokation
+info: Roblox: 2025-10-02T11:05:31.480Z,108.480972,b9fe6c0,6,Info [FLog::AudioFocusService] AudioFocusService::AudioFocusService() onServiceProvider teardown
+info: Roblox: 2025-10-02T11:05:31.559Z,108.559486,b9fe6c0,6,Info [FLog::AudioFocusService] AudioFocusService::AudioFocusService() destructor
+info: Roblox: 2025-10-02T11:05:31.564Z,108.564781,b9fe6c0,6,Warning [FLog::SingleSurfaceApp] destroyLuaApp: (stage:Native)... finished destroying luaApp.
+info: Roblox: 2025-10-02T11:05:31.564Z,108.564827,b9fe6c0,6 [FLog::SingleSurfaceApp] setStage: (stage:None)
+info: app: lifecycle: clean_exit_success delta=2148.9765239953995ms
+programController: types/wlr_compositor.c:734: surface_handle_resource_destroy: Assertion `wl_list_empty(&surface->events.commit.listener_list)' failed.
+Aborted                    (core dumped) ./build/bin/programController
+

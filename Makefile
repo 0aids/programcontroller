@@ -1,5 +1,7 @@
 CXX=g++
-DEV_FLAGS = -std=c++23 -g -O1 -MD -MP  -DWLR_USE_UNSTABLE -fsanitize=address,undefined
+DEV_FLAGS = -std=c++23 -g -MD -MP  -DWLR_USE_UNSTABLE -fsanitize=address,undefined
+OPT_VAR = -O1 # When debug it is -O0 to help with tracing.
+
 
 PKGS =   wayland-server libinput xkbcommon wlroots-0.19
 
@@ -23,13 +25,16 @@ files:
 
 all: dirs $(BIN)
 
+debug: OPT_VAR = -O0
+debug: dirs $(BIN)
+
 $(BIN): $(OFILES) $(LOFILES)
 	@echo "Compiling '$^' into $@"
-	$(CXX) $(DEV_FLAGS) -o $(BIN) $^  $(LINCLUDES)
+	$(CXX) $(DEV_FLAGS) $(OPT_VAR) -o $(BIN) $^  $(LINCLUDES)
 
 build/interrim/%.o: src/%.cpp
 	@echo "Compiling '$<' into '$@'"
-	$(CXX) $(DEV_FLAGS)  -o $@ $< -c $(INCLUDES) $(LINCLUDES)
+	$(CXX) $(DEV_FLAGS) $(OPT_VAR) -o $@ $< -c $(INCLUDES) $(LINCLUDES) 
 
 dirs:
 	mkdir -p build/bin build/interrim build/interrim/inputs build/interrim/memory_reader

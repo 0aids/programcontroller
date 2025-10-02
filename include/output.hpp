@@ -1,12 +1,16 @@
 // All the responders to new outputs and shit.
 #pragma once
+#include "manager_core.hpp"
+extern "C" {
 #include <wayland-server-core.h>
 #include <wayland-util.h>
-extern "C" {
+#include <wlr/backend.h>
+#define static
+#include <wlr/types/wlr_scene.h>
+#undef static
 #include <wlr/types/wlr_output.h>
 #include <wlr/types/wlr_output_layout.h>
 };
-class WaylandServer;
 
 /* Externally required:
  *      wlr_scene           (To get the current output for a frame, 
@@ -24,28 +28,29 @@ class WaylandServer;
  *      wl_backend -> events . new_output       (obvious)
  *      
  * */
+class WLR_State;
 
-class OutputManager {
+class OutputManager : public IManager {
+  private:
+    WLR_State*  d_state;
+
+    wl_listener m_newOutputListener;
+
   public:
-    friend class WaylandServer;
-
-    WaylandServer*     m_parentServer;
-    wl_listener        m_newOutputListener;
-    wlr_output_layout* m_outputLayout;
-    wl_list            m_outputs_l;
-
     static void newOutputHandler(wl_listener* listener, void* data);
-    void init(WaylandServer* parentServer, wl_display* display);
+
+    void        init(WLR_State* state);
 };
 
 class WaylandOutput {
-  public:
-    wl_list        m_link;
-    WaylandServer* m_parentServer;
-    wlr_output*    m_output;
-    wl_listener    m_newFrameListener;
-    wl_listener    m_newStateListener;
-    wl_listener    m_destroyRequestListener;
+  private:
+    WLR_State*  d_state;
+
+    wl_list     m_link;
+    wlr_output* m_output;
+    wl_listener m_newFrameListener;
+    wl_listener m_newStateListener;
+    wl_listener m_destroyRequestListener;
 
   public:
     void static newFrameResponder(wl_listener* listener, void* data);
@@ -53,5 +58,5 @@ class WaylandOutput {
     void static DestroyRequestResponder(wl_listener* listener,
                                         void*        data);
 
-    WaylandOutput(OutputManager* outputManager, wlr_output* output);
+    WaylandOutput(WLR_State* state, wlr_output* output);
 };

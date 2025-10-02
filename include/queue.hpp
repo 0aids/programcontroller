@@ -1,3 +1,4 @@
+#pragma once
 #include <atomic>
 #include <chrono>
 #include <cstdlib> // For rand() and srand()
@@ -22,7 +23,9 @@ class SPSCQueue {
 
   public:
     std::counting_semaphore<> m_semaphore{0};
-    SPSCQueue(size_t size) : m_size(size), m_arr(std::vector<T>(size)), m_tail(0), m_head(0) {}
+    SPSCQueue(size_t size) :
+        m_size(size), m_arr(std::vector<T>(size)), m_tail(0),
+        m_head(0) {}
 
     // False for failed, True for success.
     bool enqueue(T input) {
@@ -46,7 +49,8 @@ class SPSCQueue {
     }
 
     bool isEmpty() {
-        return (m_head.load(std::memory_order_acquire) == m_tail.load(std::memory_order_acquire));
+        return (m_head.load(std::memory_order_acquire) ==
+                m_tail.load(std::memory_order_acquire));
     }
 
     bool acquiredDequeue(T& resultReference) {

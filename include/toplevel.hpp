@@ -1,4 +1,5 @@
 #pragma once
+#include "manager_core.hpp"
 extern "C" {
 #include <wayland-server-core.h>
 #include <wlr/backend.h>
@@ -8,29 +9,26 @@ extern "C" {
 #undef static
 }
 
-class WaylandServer;
-
 /* Externally required:
  *      wl_display      (for creating the xdg_shell)
  *      
  * */
 
-class TopLevelsManager {
+class WLR_State;
+
+class TopLevelsManager : public IManager {
   public:
-    WaylandServer* m_parentServer;
+    WLR_State*  d_state;
 
-    wl_list        m_topLevels_l;
-    wl_listener    m_topLevelListener;
-    wl_listener    m_topLevelPopupListener;
-
-    wlr_xdg_shell* m_xdgShell;
+    wl_listener m_topLevelListener;
+    wl_listener m_topLevelPopupListener;
 
   public:
     static void newTopLevelResponder(wl_listener* listener,
                                      void*        data);
     static void newTopLevelPopupResponder(wl_listener* listener,
                                           void*        data);
-    void        init(WaylandServer* parentServer);
+    void        init(WLR_State* state);
 };
 
 /* Externally required:
@@ -48,8 +46,9 @@ class TopLevelsManager {
 
 class TopLevelView {
   public:
+    WLR_State*        d_state;
+
     wl_list           m_link;
-    WaylandServer*    m_parentServer;
     wlr_xdg_toplevel* m_topLevel;
     wlr_scene_tree*   m_sceneTree;
 
@@ -65,6 +64,5 @@ class TopLevelView {
   public:
     static void commitResponder(wl_listener* listener, void* data);
 
-    TopLevelView(WaylandServer*    parentServer,
-                 wlr_xdg_toplevel* topLevel);
+    TopLevelView(WLR_State* state, wlr_xdg_toplevel* topLevel);
 };

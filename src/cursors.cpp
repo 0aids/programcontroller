@@ -2,6 +2,8 @@
 #include "log.hpp"
 #include "server.hpp"
 #include <wayland-server-core.h>
+#include <mutex>
+#include "toplevel.hpp"
 
 extern "C" {
 #include <wayland-util.h>
@@ -10,46 +12,43 @@ extern "C" {
 #include <wlr/util/region.h>
 }
 #include <iostream>
-
-void CursorManager::cursorMotionResponder(wl_listener* listener,
-                                          void*        data) {
-    CursorManager* self =
-        wl_container_of(listener, self, m_cursorMotionListener);
-    Log(Debug, "New cursorMotion detected");
-    auto* mouseEvent =
-        static_cast<struct wlr_pointer_motion_event*>(data);
+void CursorManager::cursorMotion(
+    wlr_pointer_motion_event* mouseEvent) {
+    std::lock_guard<std::mutex> lock(counterMutex);
 
     auto   dx = mouseEvent->delta_x, dy = mouseEvent->delta_y;
 
     double sx, sy;
-    auto*  node = wlr_scene_node_at(
-        &self->m_parentServer->m_sceneManager.m_scene->tree.node,
-        self->m_cursor->x, self->m_cursor->y, &sx, &sy);
+    auto*  node =
+        wlr_scene_node_at(&d_state->Scenes.m_scene->tree.node,
+                          d_state->Cursors.m_cursor->x,
+                          d_state->Cursors.m_cursor->y, &sx, &sy);
 
     wlr_pointer_constraint_v1* constraint = nullptr;
     time_t                     t;
     time(&t);
 
+    wlr_seat_pointer_notify_enter(
+        d_state->Core.m_seat,
+        d_state->UserState.m_cursorFocusedSurface, sx, sy);
+
     // This is required in order for games to react to camera dragging motions.
     wlr_relative_pointer_manager_v1_send_relative_motion(
-        self->m_relativePointerManager,
-        self->m_parentServer->m_inputManager.m_seat, t,
-        mouseEvent->delta_x, mouseEvent->delta_y,
-        mouseEvent->unaccel_dx, mouseEvent->unaccel_dy);
+        d_state->Cursors.m_relativePointerManager,
+        d_state->Core.m_seat, t, mouseEvent->delta_x,
+        mouseEvent->delta_y, mouseEvent->unaccel_dx,
+        mouseEvent->unaccel_dy);
 
     // This part is to ensure the game has focus at all times. I have no clue how
     // it works, i just stole it from dwl.
-    wl_list_for_each(constraint,
-                     &self->m_pointerConstraints->constraints, link) {
-    }
+    wl_list_for_each(
+        constraint,
+        &d_state->Cursors.m_pointerConstraints->constraints, link) {}
     if (constraint &&
-        !wl_list_empty(&self->m_parentServer->m_topLevelsManager
-                            .m_topLevels_l)) {
+        !wl_list_empty(&d_state->TopLevels.m_topLevels_l)) {
 
-        TopLevelView* main_view =
-            wl_container_of(self->m_parentServer->m_topLevelsManager
-                                .m_topLevels_l.next,
-                            main_view, m_link);
+        TopLevelView* main_view = wl_container_of(
+            d_state->TopLevels.m_topLevels_l.next, main_view, m_link);
         wlr_surface* target_surface =
             main_view->m_topLevel->base->surface;
 
@@ -65,17 +64,24 @@ void CursorManager::cursorMotionResponder(wl_listener* listener,
         }
     }
 
-    wlr_cursor_move(self->m_cursor, &mouseEvent->pointer->base, dx,
-                    dy);
+    wlr_cursor_move(d_state->Cursors.m_cursor,
+                    d_state->Cursors.m_cursorDevice, dx, dy);
 
-    wlr_seat_pointer_notify_motion(
-        self->m_parentServer->m_inputManager.m_seat,
-        mouseEvent->time_msec, sx, sy);
-    // Show the actual cursor
-    // wlr_cursor_set_xcursor(
-    //     self->m_parentServer->m_inputManager.m_cursorManager.m_cursor,
-    //     self->m_parentServer->m_inputManager.m_cursorManager.m_xcursorManager,
-    //     "default");
+    wlr_seat_pointer_notify_motion(d_state->Core.m_seat,
+                                   mouseEvent->time_msec, sx, sy);
+}
+
+void CursorManager::cursorMotionResponder(wl_listener* listener,
+                                          void*        data) {
+    // 2. Create a lock_guard object
+    // When lock_guard is created, it calls counter_mutex.lock().
+    CursorManager* self =
+        wl_container_of(listener, self, m_cursorMotionListener);
+    Log(Debug, "New cursorMotion detected");
+    auto* mouseEvent =
+        static_cast<struct wlr_pointer_motion_event*>(data);
+
+    self->cursorMotion(mouseEvent);
 }
 
 void CursorManager::cursorMotionAbsoluteResponder(
@@ -88,8 +94,8 @@ void CursorManager::cursorMotionAbsoluteResponder(
         static_cast<struct wlr_pointer_motion_absolute_event*>(data);
 
     // Make sure the cursor doesn't get offsetted too far.
-    wlr_cursor_warp_absolute(self->m_cursor,
-                             &mouseEvent->pointer->base,
+    wlr_cursor_warp_absolute(self->d_state->Cursors.m_cursor,
+                             self->d_state->Cursors.m_cursorDevice,
                              mouseEvent->x, mouseEvent->y);
 }
 
@@ -102,8 +108,8 @@ void CursorManager::cursorButtonResponder(wl_listener* listener,
         static_cast<struct wlr_pointer_button_event*>(data);
 
     wlr_seat_pointer_notify_button(
-        self->m_parentServer->m_inputManager.m_seat,
-        mouseEvent->time_msec, mouseEvent->button, mouseEvent->state);
+        self->d_state->Core.m_seat, mouseEvent->time_msec,
+        mouseEvent->button, mouseEvent->state);
 }
 
 void CursorManager::requestSetCursorResponder(wl_listener* listener,
@@ -119,8 +125,9 @@ void CursorManager::requestSetCursorResponder(wl_listener* listener,
 
     // Check that the seat client asking for the change is the one with pointer
     // focus.
-    wlr_cursor_set_surface(self->m_cursor, event->surface,
-                           event->hotspot_x, event->hotspot_y);
+    wlr_cursor_set_surface(self->d_state->Cursors.m_cursor,
+                           event->surface, event->hotspot_x,
+                           event->hotspot_y);
 }
 void CursorConstraint::destroyResponder(wl_listener* listener,
                                         void*        data) {
@@ -152,37 +159,33 @@ void CursorManager::newConstraintResponder(wl_listener* listener,
                   &cursorConstraint->m_destroyListener);
 }
 
-void CursorManager::init(WaylandServer* parentServer) {
-    m_parentServer = parentServer;
-    m_cursor       = wlr_cursor_create();
-
-    wlr_cursor_attach_output_layout(
-        m_cursor, parentServer->m_outputManager.m_outputLayout);
-
-    m_xcursorManager = wlr_xcursor_manager_create(NULL, 24);
-
+void CursorManager::init(WLR_State* state) {
+    Log(Debug, "Initiaizing the cursor manager");
+    d_state                       = state;
     m_cursorMotionListener.notify = cursorMotionResponder;
     m_cursorMotionAbsoluteListener.notify =
         cursorMotionAbsoluteResponder;
     m_cursorButtonListener.notify     = cursorButtonResponder;
     m_requestSetCursorListener.notify = requestSetCursorResponder;
 
-    wl_signal_add(&m_cursor->events.motion, &m_cursorMotionListener);
-    wl_signal_add(&m_cursor->events.motion_absolute,
+    wl_signal_add(&d_state->Cursors.m_cursor->events.motion,
+                  &m_cursorMotionListener);
+    wl_signal_add(&d_state->Cursors.m_cursor->events.motion_absolute,
                   &m_cursorMotionAbsoluteListener);
-    wl_signal_add(&m_cursor->events.button, &m_cursorButtonListener);
-    wl_signal_add(&m_parentServer->m_inputManager.m_seat->events
-                       .request_set_cursor,
+    wl_signal_add(&d_state->Cursors.m_cursor->events.button,
+                  &m_cursorButtonListener);
+    wl_signal_add(&d_state->Core.m_seat->events.request_set_cursor,
                   &m_requestSetCursorListener);
-
-    m_pointerConstraints =
-        wlr_pointer_constraints_v1_create(m_parentServer->m_display);
-
-    m_relativePointerManager = wlr_relative_pointer_manager_v1_create(
-        m_parentServer->m_display);
 
     m_newConstraintListener.notify = newConstraintResponder;
 
-    wl_signal_add(&m_pointerConstraints->events.new_constraint,
-                  &m_newConstraintListener);
+    wl_signal_add(
+        &d_state->Cursors.m_pointerConstraints->events.new_constraint,
+        &m_newConstraintListener);
+}
+
+void CursorManager::newCursor(wlr_input_device* device) {
+    Log(Debug, "Initializing new cursor");
+    d_state->Cursors.m_cursorDevice = device;
+    wlr_cursor_attach_input_device(d_state->Cursors.m_cursor, device);
 }

@@ -9,14 +9,13 @@ extern "C" {
 }
 void WaylandOutput::newFrameResponder(wl_listener* listener,
                                       void*        data) {
-    Log(Debug, "Frame request received!");
+    // Log(Debug, "Frame request received!");
     WaylandOutput* self =
         wl_container_of(listener, self, m_newFrameListener);
     // This is the rendering loop.
     struct wlr_scene_output* scene_output =
-        wlr_scene_get_scene_output(
-            self->m_parentServer->m_sceneManager.m_scene,
-            self->m_output);
+        wlr_scene_get_scene_output(self->d_state->Scenes.m_scene,
+                                   self->m_output);
 
     // Render the scene if needed.
     if (!wlr_scene_output_commit(scene_output, NULL)) {
@@ -49,16 +48,10 @@ void WaylandOutput::DestroyRequestResponder(wl_listener* listener,
     // Nothing for now
 }
 
-WaylandOutput::WaylandOutput(OutputManager* outputManager,
-                             wlr_output*    output) {
-    m_output = output;
-    // This line was effectively missing. It connects this output
-    // back to the main server object.
-    m_parentServer = outputManager->m_parentServer;
-
+WaylandOutput::WaylandOutput(WLR_State* state, wlr_output* output) {
+    d_state                   = state;
+    m_output                  = output;
     m_newFrameListener.notify = newFrameResponder;
-    // m_server = parentServer; // This line seems redundant if you use
-    // m_parentServer consistently
     wl_signal_add(&m_output->events.frame, &m_newFrameListener);
 
     m_newStateListener.notify = newStateResponder;
@@ -68,30 +61,19 @@ WaylandOutput::WaylandOutput(OutputManager* outputManager,
     m_destroyRequestListener.notify = DestroyRequestResponder;
     wl_signal_add(&m_output->events.destroy,
                   &m_destroyRequestListener);
-    // Adds a the new output from left to right because i'm fucking lazy.
-    struct wlr_output_layout_output* layoutOutput =
-        wlr_output_layout_add_auto(outputManager->m_outputLayout,
-                                   m_output);
-
-    struct wlr_scene_output* sceneOutput = wlr_scene_output_create(
-        m_parentServer->m_sceneManager.m_scene, m_output);
-
-    wlr_scene_output_layout_add_output(
-        m_parentServer->m_sceneManager.m_sceneLayout, layoutOutput,
-        sceneOutput);
 }
 
 // static
 void OutputManager::newOutputHandler(wl_listener* listener,
                                      void*        data) {
+    // This is just a factory that creates outputs, so we let the actual waylandOutput object only handle signals.
     Log(Debug, "New output detected!");
     OutputManager* self =
         wl_container_of(listener, self, m_newOutputListener);
     auto* newOutput = static_cast<wlr_output*>(data);
 
-    wlr_output_init_render(newOutput,
-                           self->m_parentServer->m_allocator,
-                           self->m_parentServer->m_renderer);
+    wlr_output_init_render(newOutput, self->d_state->Core.m_allocator,
+                           self->d_state->Core.m_renderer);
     struct wlr_output_state state;
     wlr_output_state_init(&state);
     wlr_output_state_set_enabled(&state, true);
@@ -107,16 +89,28 @@ void OutputManager::newOutputHandler(wl_listener* listener,
     wlr_output_commit_state(newOutput, &state);
     wlr_output_state_finish(&state);
 
+    // Adds a the new output from left to right because i'm fucking lazy.
+    struct wlr_output_layout_output* layoutOutput =
+        wlr_output_layout_add_auto(
+            self->d_state->Outputs.m_outputLayout, newOutput);
+
+    struct wlr_scene_output* sceneOutput = wlr_scene_output_create(
+        self->d_state->Scenes.m_scene, newOutput);
+
+    wlr_scene_output_layout_add_output(
+        self->d_state->Scenes.m_sceneLayout, layoutOutput,
+        sceneOutput);
+
     // This will manage itself i hope. this is what they essentially did for tinywl.
-    WaylandOutput* out = new WaylandOutput(self, newOutput);
+    // TODO: Check for fixes
+    WaylandOutput* out = new WaylandOutput(self->d_state, newOutput);
 }
 
-void OutputManager::init(WaylandServer* parentServer,
-                         wl_display*    display) {
-    m_parentServer = parentServer;
-    m_outputLayout = wlr_output_layout_create(display);
-    wl_list_init(&m_outputs_l);
+void OutputManager::init(WLR_State* state) {
+    Log(Debug, "Initializing the output manager");
+    d_state = state;
+
     m_newOutputListener.notify = newOutputHandler;
-    wl_signal_add(&m_parentServer->m_backend->events.new_output,
+    wl_signal_add(&state->Core.m_backend->events.new_output,
                   &m_newOutputListener);
 }

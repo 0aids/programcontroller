@@ -23,13 +23,14 @@ namespace {
 LoggerWrapper::LoggerWrapper(LogsList* logsList, bool checkLast,
                              LogLevel         level,
                              std::string_view filename,
-                             std::string_view functionName) :
+                             std::string_view functionName,
+                             size_t           lineNumber) :
     m_logsList(logsList), m_checkLast(checkLast) {
     if (m_logsList) {
         m_ss.emplace(); // Construct the std::stringstream
         // Prepend the log message with level, file, and function info.
-        *m_ss << levelToString(level) << " (" << filename << " in "
-              << functionName << ") ";
+        *m_ss << levelToString(level) << " (" << filename << ":"
+              << functionName << ":" << lineNumber << ") ";
     }
 }
 
@@ -52,13 +53,13 @@ LogsList      Logger::m_logsList;
 
 LoggerWrapper Logger::log(LogLevel level, std::string_view filename,
                           std::string_view functionName,
-                          bool             checkLast) {
+                          size_t lineNumber, bool checkLast) {
     if (level > m_logLevel) {
         return LoggerWrapper(); // Return an empty wrapper that does nothing.
     }
 
     return LoggerWrapper(&m_logsList, checkLast, level, filename,
-                         functionName);
+                         functionName, lineNumber);
 }
 
 // --- LogsList Implementation ---
